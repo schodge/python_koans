@@ -18,7 +18,25 @@
 #
 def triangle(a, b, c):
     # DELETE 'PASS' AND WRITE THIS CODE
-    pass
+    try:
+        tril = [a, b, c]
+        tri = {a, b, c}
+        test = len(tri)
+        for x in tri:
+            if (x <= 0):
+                raise TriangleError
+        tris = sorted(tril)
+        if ((tris[2] - tris[1] - tris[0]) >= 0):
+            raise TriangleError
+        if test == 1:
+            out = 'equilateral'
+        elif test == 2:
+            out = 'isosceles'
+        else:
+            out = 'scalene'
+        return out
+    except Exception as err:
+        raise TriangleError
 
 # Error class used in part 2.  No need to change this code.
 class TriangleError(Exception):
