@@ -33,8 +33,23 @@ from runner.koan import *
 # Your goal is to write the score method.
 
 def score(dice):
-    # You need to write this method
-    pass
+    score = 0
+    if len(dice) != 0:
+        from collections import Counter
+        dset = Counter(dice)
+        if dset[1] >= 3:
+            score += 1000
+            dset[1] = dset[1] - 3
+        # Since dice is limited to 5, if two values both appear twice
+        # it doesn't matter
+        index, count = dset.most_common()[0]
+        if count >= 3:
+            score += index * 100
+            dset[index] = dset[index] - 3
+        score += 100 * dset[1]
+        score += 50 * dset[5]
+    return score
+
 
 class AboutScoringProject(Koan):
     def test_score_of_an_empty_list_is_zero(self):
