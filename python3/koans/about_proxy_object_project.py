@@ -25,7 +25,13 @@ class Proxy:
         #initialize '_obj' attribute last. Trust me on this!
         self._obj = target_object
 
-    # WRITE CODE HERE
+    def __getattribute__(self, attr_name):
+        return self._obj.__getattribute__(attr_name)
+
+    def method_missing():
+        pass
+
+
 
 # The proxy object should pass the following Koan:
 #
