@@ -17,21 +17,39 @@
 # can do it!
 
 from runner.koan import *
+from collections import Counter
 
-class Proxy:
+
+class Proxy(object):
     def __init__(self, target_object):
-        # WRITE CODE HERE
-
+        object.__setattr__(self, '_msg_count', Counter())
+        object.__setattr__(self, '_logs', [])
         #initialize '_obj' attribute last. Trust me on this!
         self._obj = target_object
 
-    def __getattribute__(self, attr_name):
-        return self._obj.__getattribute__(attr_name)
+    def __getattr__(self, attr_name):
+        if attr_name == '_obj':
+            raise AttributeError
+        self._logs.append(attr_name)
+        self._msg_count[attr_name] += 1
+        return getattr(self._obj, attr_name)
 
-    def method_missing():
-        pass
+    def __setattr__(self, attr_name, value):
+        if hasattr(self, '_obj'):
+            object.__setattr__(self._obj, attr_name, value)
+            self._logs.append(attr_name)
+            self._msg_count[attr_name] += 1
+        else:
+            object.__setattr__(self, attr_name, value)
 
+    def messages(self):
+        return self._logs
 
+    def number_of_times_called(self, attr_name):
+        return self._msg_count[attr_name]
+
+    def was_called(self, attr_name):
+        return attr_name in self._msg_count
 
 # The proxy object should pass the following Koan:
 #
@@ -61,41 +79,31 @@ class AboutProxyObjectProject(Koan):
 
     def test_proxy_handles_invalid_messages(self):
         tv = Proxy(Television())
-
         ex = None
         with self.assertRaises(AttributeError):
             tv.no_such_method()
 
-
     def test_proxy_reports_methods_have_been_called(self):
         tv = Proxy(Television())
-
         tv.power()
         tv.power()
-
         self.assertTrue(tv.was_called('power'))
         self.assertFalse(tv.was_called('channel'))
 
     def test_proxy_counts_method_calls(self):
         tv = Proxy(Television())
-
         tv.power()
         tv.channel = 48
         tv.power()
-
         self.assertEqual(2, tv.number_of_times_called('power'))
         self.assertEqual(1, tv.number_of_times_called('channel'))
         self.assertEqual(0, tv.number_of_times_called('is_on'))
 
     def test_proxy_can_record_more_than_just_tv_objects(self):
         proxy = Proxy("Py Ohio 2010")
-
         result = proxy.upper()
-
         self.assertEqual("PY OHIO 2010", result)
-
         result = proxy.split()
-
         self.assertEqual(["Py", "Ohio", "2010"], result)
         self.assertEqual(['upper', 'split'], proxy.messages())
 
